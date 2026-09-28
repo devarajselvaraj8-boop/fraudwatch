@@ -1,0 +1,46 @@
+@import "./style.css";
+
+/* Dashboard-specific clean layout utilities */
+.dash-rule-card {
+    border: 1px solid var(--navy);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    background-color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.dash-rule-card:last-child {
+    margin-bottom: 0;
+}
+
+.dash-rule-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.dash-rule-desc {
+    font-size: 0.8rem;
+    color: var(--navy-60);
+    margin-top: 2px;
+}
+
+.dash-rule-count {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1;
+    text-align: right;
+}
+
+.dash-rule-count-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--navy-60);
+    margin-top: 2px;
+    text-align: right;
+}

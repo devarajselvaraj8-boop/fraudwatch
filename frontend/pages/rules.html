@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudWatch — Rules</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="app-sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <div class="brand-name">FraudWatch</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="transactions.html" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    <span>Transactions</span>
+                </a>
+                <a href="flagged.html" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <span>Flagged Transactions</span>
+                </a>
+                <a href="reviews.html" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span>Reviews</span>
+                </a>
+                <a href="rules.html" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>Rules</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                FraudWatch &bull; System Active
+            </div>
+        </aside>
+
+        <!-- Mobile Overlay -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="app-main">
+            <!-- HEADER -->
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="mobile-toggle-btn" id="sidebar-toggle" aria-label="Toggle Navigation">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    </button>
+                    <div class="header-title-group">
+                        <span class="header-brand">FraudWatch</span>
+                        <span class="header-title">Rules</span>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="header-user-badge">Admin</div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="page-intro">
+                    <div>
+                        <h1 class="page-title">Detection Rules</h1>
+                        <p class="page-subtitle">Configure high amount and velocity anomaly surveillance parameters</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" id="createRuleBtn">
+                            Create Rule
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alert / Direct Query Banner -->
+                <div id="ruleAlertBanner" style="display: none; padding: 14px 18px; margin-bottom: 24px; border: 1px solid var(--navy); background-color: var(--white); color: var(--navy); font-size: 0.9rem; font-weight: 600; letter-spacing: 0.02em;"></div>
+
+                <!-- Mini Metric Cards -->
+                <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Rules</div>
+                        <div class="kpi-value" id="totalRulesCount">0</div>
+                        <div class="kpi-desc">Registered policies</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-label">Active Rules</div>
+                        <div class="kpi-value" id="activeRulesCount">0</div>
+                        <div class="kpi-desc">Currently screening</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-label">High Amount</div>
+                        <div class="kpi-value" id="highAmountRulesCount">0</div>
+                        <div class="kpi-desc">Value threshold triggers</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-label">Velocity</div>
+                        <div class="kpi-value" id="velocityRulesCount">0</div>
+                        <div class="kpi-desc">Frequency burst triggers</div>
+                    </div>
+                </div>
+
+                <!-- Filters & Controls Bar -->
+                <div class="filter-bar">
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="searchRuleInput" class="search-input" placeholder="Search rules by name or type...">
+                    </div>
+
+                    <div class="filter-group">
+                        <select id="filterRuleType" class="filter-select">
+                            <option value="ALL">All Rule Types</option>
+                            <option value="HIGH_AMOUNT">High Amount</option>
+                            <option value="VELOCITY">Velocity</option>
+                        </select>
+
+                        <select id="filterRuleStatus" class="filter-select">
+                            <option value="ALL">All States</option>
+                            <option value="ACTIVE">Active Only</option>
+                            <option value="INACTIVE">Disabled Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Rules Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Rule Name</th>
+                                <th>Type</th>
+                                <th>Criteria</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rulesTableBody">
+                            <!-- Populated dynamically via rules.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create / Edit Rule Modal -->
+    <div id="ruleModal" class="modal-backdrop">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 id="ruleModalTitle">Configure Rule</h3>
+                <button class="modal-close" onclick="closeModal('ruleModal')">&times;</button>
+            </div>
+            <form id="ruleForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label required" for="ruleName">Rule Name</label>
+                        <input type="text" id="ruleName" class="form-control" placeholder="e.g. Excessive Transfer Amount" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required" for="ruleType">Rule Type</label>
+                            <select id="ruleType" class="form-control" required>
+                                <option value="HIGH_AMOUNT">HIGH_AMOUNT</option>
+                                <option value="VELOCITY">VELOCITY</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Active State</label>
+                            <div class="switch-group" style="padding-top: 6px;">
+                                <label class="switch">
+                                    <input type="checkbox" id="ruleActive" checked>
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="text-sm" style="color: var(--navy-60);">Enable rule</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HIGH_AMOUNT Parameter -->
+                    <div id="highAmountGroup" class="form-group">
+                        <label class="form-label required" for="ruleAmountThreshold">Amount Threshold (₹)</label>
+                        <input type="number" id="ruleAmountThreshold" class="form-control" placeholder="e.g. 10000.00" step="0.01" min="1">
+                        <div class="form-hint">Transactions with amount exceeding this value will be flagged immediately.</div>
+                    </div>
+
+                    <!-- VELOCITY Parameters -->
+                    <div id="velocityGroup" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required" for="ruleTransactionCount">Max Transaction Count</label>
+                                <input type="number" id="ruleTransactionCount" class="form-control" placeholder="e.g. 5" min="1" step="1">
+                                <div class="form-hint">Threshold count from same sender.</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label required" for="ruleTimeWindow">Time Window (Minutes)</label>
+                                <input type="number" id="ruleTimeWindow" class="form-control" placeholder="e.g. 10" min="1" step="1">
+                                <div class="form-hint">Rolling time window.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('ruleModal')">Cancel</button>
+                    <button type="submit" id="ruleSubmitBtn" class="btn btn-primary">Save Rule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/rules.js"></script>
+</body>
+</html>
