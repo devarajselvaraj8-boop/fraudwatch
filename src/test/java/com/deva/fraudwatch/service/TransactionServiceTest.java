@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.deva.fraudwatch.dto.TransactionRequest;
 import com.deva.fraudwatch.dto.TransactionResponse;
 import com.deva.fraudwatch.entity.FlaggedTransaction;
+import com.deva.fraudwatch.entity.ReviewOutcome;
 import com.deva.fraudwatch.entity.Rule;
 import com.deva.fraudwatch.entity.Transaction;
 import com.deva.fraudwatch.enums.ReviewStatus;
@@ -31,6 +33,7 @@ import com.deva.fraudwatch.enums.TransactionStatus;
 import com.deva.fraudwatch.exception.BusinessRuleException;
 import com.deva.fraudwatch.exception.ResourceNotFoundException;
 import com.deva.fraudwatch.repository.FlaggedTransactionRepository;
+import com.deva.fraudwatch.repository.ReviewOutcomeRepository;
 import com.deva.fraudwatch.repository.TransactionRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +48,9 @@ class TransactionServiceTest {
     @Mock
     private FlaggedTransactionRepository flaggedTransactionRepository;
 
+    @Mock
+    private ReviewOutcomeRepository reviewOutcomeRepository;
+
     private TransactionService transactionService;
 
     @BeforeEach
@@ -52,7 +58,8 @@ class TransactionServiceTest {
         transactionService = new TransactionService(
                 transactionRepository,
                 fraudDetectionService,
-                flaggedTransactionRepository
+                flaggedTransactionRepository,
+                reviewOutcomeRepository
         );
     }
 
@@ -78,7 +85,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    void testCreateTransaction_TriggeredFraud_Flagged() {
+    void testCreateTransaction_SingleRule_FlaggedPending() {
         TransactionRequest req = new TransactionRequest();
         req.setSender("ACC100");
         req.setReceiver("ACC200");
@@ -99,7 +106,139 @@ class TransactionServiceTest {
         TransactionResponse res = transactionService.createTransaction(req);
         assertNotNull(res);
         assertEquals(TransactionStatus.FLAGGED, res.getStatus());
-        verify(flaggedTransactionRepository).save(any(FlaggedTransaction.class));
+
+        ArgumentCaptor<FlaggedTransaction> ftCaptor = ArgumentCaptor.forClass(FlaggedTransaction.class);
+        verify(flaggedTransactionRepository).save(ftCaptor.capture());
+        assertEquals(ReviewStatus.PENDING, ftCaptor.getValue().getReviewStatus());
+    }
+
+    @Test
+    void testCreateTransaction_TwoUniqueRules_BlockedAutomatically() {
+        TransactionRequest req = new TransactionRequest();
+        req.setSender("ACC100");
+        req.setReceiver("ACC200");
+        req.setAmount(BigDecimal.valueOf(25000));
+
+        Rule rule1 = new Rule();
+        rule1.setId(1L);
+        rule1.setName("High Amount");
+        rule1.setType(RuleType.HIGH_AMOUNT);
+
+        Rule rule2 = new Rule();
+        rule2.setId(2L);
+        rule2.setName("Sender Velocity");
+        rule2.setType(RuleType.SENDER_VELOCITY);
+
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> {
+            Transaction t = i.getArgument(0);
+            t.setId(12L);
+            return t;
+        });
+        when(flaggedTransactionRepository.save(any(FlaggedTransaction.class))).thenAnswer(i -> i.getArgument(0));
+        when(fraudDetectionService.detectFraud(any(Transaction.class))).thenReturn(List.of(rule1, rule2));
+
+        TransactionResponse res = transactionService.createTransaction(req);
+        assertNotNull(res);
+        assertEquals(TransactionStatus.BLOCKED, res.getStatus());
+
+        ArgumentCaptor<FlaggedTransaction> ftCaptor = ArgumentCaptor.forClass(FlaggedTransaction.class);
+        verify(flaggedTransactionRepository).save(ftCaptor.capture());
+        assertEquals(ReviewStatus.BLOCKED, ftCaptor.getValue().getReviewStatus());
+        verify(reviewOutcomeRepository).save(any(ReviewOutcome.class));
+    }
+
+    @Test
+    void testCreateTransaction_DuplicateSameTypeRules_CountsAsOneUnique_FlaggedNotBlocked() {
+        TransactionRequest req = new TransactionRequest();
+        req.setSender("ACC100");
+        req.setReceiver("ACC200");
+        req.setAmount(BigDecimal.valueOf(25000));
+
+        Rule rule1 = new Rule();
+        rule1.setId(1L);
+        rule1.setName("High Amount A");
+        rule1.setType(RuleType.HIGH_AMOUNT);
+
+        Rule rule2 = new Rule();
+        rule2.setId(2L);
+        rule2.setName("High Amount B");
+        rule2.setType(RuleType.HIGH_AMOUNT);
+
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> {
+            Transaction t = i.getArgument(0);
+            t.setId(13L);
+            return t;
+        });
+        when(fraudDetectionService.detectFraud(any(Transaction.class))).thenReturn(List.of(rule1, rule2));
+
+        TransactionResponse res = transactionService.createTransaction(req);
+        assertNotNull(res);
+        assertEquals(TransactionStatus.FLAGGED, res.getStatus(), "2 rules of SAME type must count as 1 unique rule -> FLAGGED");
+
+        ArgumentCaptor<FlaggedTransaction> ftCaptor = ArgumentCaptor.forClass(FlaggedTransaction.class);
+        verify(flaggedTransactionRepository).save(ftCaptor.capture());
+        assertEquals(ReviewStatus.PENDING, ftCaptor.getValue().getReviewStatus());
+    }
+
+    @Test
+    void testCreateTransaction_SenderAndReceiverVelocity_BlockedAutomatically() {
+        TransactionRequest req = new TransactionRequest();
+        req.setSender("ACC100");
+        req.setReceiver("ACC200");
+        req.setAmount(BigDecimal.valueOf(100));
+
+        Rule rule1 = new Rule();
+        rule1.setId(2L);
+        rule1.setName("Sender Velocity");
+        rule1.setType(RuleType.SENDER_VELOCITY);
+
+        Rule rule2 = new Rule();
+        rule2.setId(3L);
+        rule2.setName("Receiver Velocity");
+        rule2.setType(RuleType.RECEIVER_VELOCITY);
+
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> {
+            Transaction t = i.getArgument(0);
+            t.setId(14L);
+            return t;
+        });
+        when(flaggedTransactionRepository.save(any(FlaggedTransaction.class))).thenAnswer(i -> i.getArgument(0));
+        when(fraudDetectionService.detectFraud(any(Transaction.class))).thenReturn(List.of(rule1, rule2));
+
+        TransactionResponse res = transactionService.createTransaction(req);
+        assertNotNull(res);
+        assertEquals(TransactionStatus.BLOCKED, res.getStatus());
+
+        ArgumentCaptor<FlaggedTransaction> ftCaptor = ArgumentCaptor.forClass(FlaggedTransaction.class);
+        verify(flaggedTransactionRepository).save(ftCaptor.capture());
+        assertEquals(ReviewStatus.BLOCKED, ftCaptor.getValue().getReviewStatus());
+    }
+
+    @Test
+    void testCreateTransaction_AllThreeRules_BlockedAutomatically() {
+        TransactionRequest req = new TransactionRequest();
+        req.setSender("ACC100");
+        req.setReceiver("ACC200");
+        req.setAmount(BigDecimal.valueOf(50000));
+
+        Rule r1 = new Rule();
+        r1.setType(RuleType.HIGH_AMOUNT);
+        Rule r2 = new Rule();
+        r2.setType(RuleType.SENDER_VELOCITY);
+        Rule r3 = new Rule();
+        r3.setType(RuleType.RECEIVER_VELOCITY);
+
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> {
+            Transaction t = i.getArgument(0);
+            t.setId(15L);
+            return t;
+        });
+        when(flaggedTransactionRepository.save(any(FlaggedTransaction.class))).thenAnswer(i -> i.getArgument(0));
+        when(fraudDetectionService.detectFraud(any(Transaction.class))).thenReturn(List.of(r1, r2, r3));
+
+        TransactionResponse res = transactionService.createTransaction(req);
+        assertNotNull(res);
+        assertEquals(TransactionStatus.BLOCKED, res.getStatus());
     }
 
     @Test
@@ -230,7 +369,6 @@ class TransactionServiceTest {
         TransactionResponse res = transactionService.updateTransaction(9L, updateReq);
         assertNotNull(res);
         assertEquals(TransactionStatus.FLAGGED, res.getStatus());
-        // Verify ft was saved/updated rather than a duplicate created
         verify(flaggedTransactionRepository).save(existingFt);
     }
 

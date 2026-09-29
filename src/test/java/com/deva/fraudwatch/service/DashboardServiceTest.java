@@ -61,7 +61,8 @@ class DashboardServiceTest {
     void testGetRuleStatistics() {
         List<Object[]> rows = List.of(
                 new Object[]{RuleType.HIGH_AMOUNT, 8L},
-                new Object[]{RuleType.VELOCITY, 4L}
+                new Object[]{RuleType.SENDER_VELOCITY, 4L},
+                new Object[]{RuleType.RECEIVER_VELOCITY, 2L}
         );
         when(flaggedTransactionRepository.countTriggersByRuleType()).thenReturn(rows);
 
@@ -69,6 +70,7 @@ class DashboardServiceTest {
 
         assertNotNull(stats);
         assertEquals(8L, stats.get("HIGH_AMOUNT"));
-        assertEquals(4L, stats.get("VELOCITY"));
+        assertEquals(4L, stats.get("SENDER_VELOCITY"));
+        assertEquals(2L, stats.get("RECEIVER_VELOCITY"));
     }
 }

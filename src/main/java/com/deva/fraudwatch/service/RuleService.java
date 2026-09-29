@@ -122,12 +122,19 @@ public class RuleService {
             if (request.getAmountThreshold() == null || request.getAmountThreshold().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new BusinessRuleException("HIGH_AMOUNT rule requires a positive amountThreshold");
             }
-        } else if (request.getType() == RuleType.VELOCITY) {
+        } else if (request.getType() == RuleType.SENDER_VELOCITY) {
             if (request.getTransactionCount() == null || request.getTransactionCount() <= 0) {
-                throw new BusinessRuleException("VELOCITY rule requires a positive transactionCount");
+                throw new BusinessRuleException("SENDER_VELOCITY rule requires a positive transactionCount");
             }
             if (request.getTimeWindowMinutes() == null || request.getTimeWindowMinutes() <= 0) {
-                throw new BusinessRuleException("VELOCITY rule requires a positive timeWindowMinutes");
+                throw new BusinessRuleException("SENDER_VELOCITY rule requires a positive timeWindowMinutes");
+            }
+        } else if (request.getType() == RuleType.RECEIVER_VELOCITY) {
+            if (request.getTransactionCount() == null || request.getTransactionCount() <= 0) {
+                throw new BusinessRuleException("RECEIVER_VELOCITY rule requires a positive transactionCount");
+            }
+            if (request.getTimeWindowMinutes() == null || request.getTimeWindowMinutes() <= 0) {
+                throw new BusinessRuleException("RECEIVER_VELOCITY rule requires a positive timeWindowMinutes");
             }
         }
     }

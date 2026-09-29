@@ -2,5 +2,6 @@ package com.deva.fraudwatch.enums;
 
 public enum RuleType {
     HIGH_AMOUNT,
-    VELOCITY
+    SENDER_VELOCITY,
+    RECEIVER_VELOCITY
 }

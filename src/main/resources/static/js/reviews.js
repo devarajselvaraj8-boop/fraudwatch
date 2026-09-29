@@ -208,6 +208,8 @@ function viewReviewDetails(id) {
                     <div class="font-mono" style="font-weight: 700;">${escapeHtml(r.name)} [${escapeHtml(r.type)}]</div>
                     <div class="text-sm" style="color: var(--navy-60); margin-top: 2px;">
                         ${r.type === 'HIGH_AMOUNT' ? `Threshold: ${formatCurrency(r.amountThreshold)}` : ''}
+                        ${r.type === 'SENDER_VELOCITY' ? `Sender Limit: ${r.transactionCount} transactions within ${r.timeWindowMinutes} minutes` : ''}
+                        ${r.type === 'RECEIVER_VELOCITY' ? `Receiver Limit: ${r.transactionCount} transactions within ${r.timeWindowMinutes} minutes` : ''}
                         ${r.type === 'VELOCITY' ? `Limit: ${r.transactionCount} transactions within ${r.timeWindowMinutes} minutes` : ''}
                     </div>
                 </div>

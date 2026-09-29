@@ -123,6 +123,10 @@ function renderRulesTable() {
         let conditionHtml = "";
         if (rule.type === "HIGH_AMOUNT") {
             conditionHtml = `Threshold: <strong>${formatCurrency(rule.amountThreshold)}</strong>`;
+        } else if (rule.type === "SENDER_VELOCITY") {
+            conditionHtml = `Sender: Max <strong>${rule.transactionCount}</strong> txns in <strong>${rule.timeWindowMinutes}</strong> mins`;
+        } else if (rule.type === "RECEIVER_VELOCITY") {
+            conditionHtml = `Receiver: Max <strong>${rule.transactionCount}</strong> txns in <strong>${rule.timeWindowMinutes}</strong> mins`;
         } else if (rule.type === "VELOCITY") {
             conditionHtml = `Max <strong>${rule.transactionCount}</strong> txns in <strong>${rule.timeWindowMinutes}</strong> mins`;
         } else {
@@ -174,16 +178,18 @@ function updateRulesSummaryCards() {
     const totalEl = document.getElementById("totalRulesCount");
     const activeEl = document.getElementById("activeRulesCount");
     const highAmountEl = document.getElementById("highAmountRulesCount");
-    const velocityEl = document.getElementById("velocityRulesCount");
+    const senderVelocityEl = document.getElementById("senderVelocityRulesCount");
+    const receiverVelocityEl = document.getElementById("receiverVelocityRulesCount");
 
     if (totalEl) totalEl.textContent = allRules.length;
     if (activeEl) activeEl.textContent = allRules.filter(r => r.active).length;
     if (highAmountEl) highAmountEl.textContent = allRules.filter(r => r.type === "HIGH_AMOUNT" && r.active).length;
-    if (velocityEl) velocityEl.textContent = allRules.filter(r => r.type === "VELOCITY" && r.active).length;
+    if (senderVelocityEl) senderVelocityEl.textContent = allRules.filter(r => r.type === "SENDER_VELOCITY" && r.active).length;
+    if (receiverVelocityEl) receiverVelocityEl.textContent = allRules.filter(r => r.type === "RECEIVER_VELOCITY" && r.active).length;
 }
 
 /**
- * Handle type switch in rule modal (HIGH_AMOUNT vs VELOCITY)
+ * Handle type switch in rule modal
  */
 function handleRuleTypeChange() {
     const type = document.getElementById("ruleType")?.value;
@@ -192,6 +198,7 @@ function handleRuleTypeChange() {
     const thresholdInput = document.getElementById("ruleAmountThreshold");
     const countInput = document.getElementById("ruleTransactionCount");
     const windowInput = document.getElementById("ruleTimeWindow");
+    const velocityHint = document.getElementById("velocityHint");
 
     if (type === "HIGH_AMOUNT") {
         if (highAmountGroup) highAmountGroup.style.display = "block";
@@ -199,12 +206,21 @@ function handleRuleTypeChange() {
         if (thresholdInput) thresholdInput.required = true;
         if (countInput) countInput.required = false;
         if (windowInput) windowInput.required = false;
-    } else if (type === "VELOCITY") {
+    } else {
         if (highAmountGroup) highAmountGroup.style.display = "none";
         if (velocityGroup) velocityGroup.style.display = "block";
         if (thresholdInput) thresholdInput.required = false;
         if (countInput) countInput.required = true;
         if (windowInput) windowInput.required = true;
+        if (velocityHint) {
+            if (type === "SENDER_VELOCITY") {
+                velocityHint.textContent = "Threshold count from same sender.";
+            } else if (type === "RECEIVER_VELOCITY") {
+                velocityHint.textContent = "Threshold count to same receiver.";
+            } else {
+                velocityHint.textContent = "Threshold count within time window.";
+            }
+        }
     }
 }
 
@@ -229,7 +245,7 @@ function openRuleModal(rule = null) {
 
         if (rule.type === "HIGH_AMOUNT") {
             document.getElementById("ruleAmountThreshold").value = rule.amountThreshold || "";
-        } else if (rule.type === "VELOCITY") {
+        } else {
             document.getElementById("ruleTransactionCount").value = rule.transactionCount || "";
             document.getElementById("ruleTimeWindow").value = rule.timeWindowMinutes || "";
         }
@@ -296,7 +312,7 @@ async function handleSaveRule(e) {
             return;
         }
         payload.amountThreshold = threshold;
-    } else if (type === "VELOCITY") {
+    } else if (type === "SENDER_VELOCITY" || type === "RECEIVER_VELOCITY" || type === "VELOCITY") {
         const count = parseInt(document.getElementById("ruleTransactionCount")?.value, 10);
         const windowMins = parseInt(document.getElementById("ruleTimeWindow")?.value, 10);
 

@@ -30,12 +30,12 @@ public class FraudDetectionService {
     public List<Rule> detectFraud(Transaction transaction) {
 
         List<Rule> triggeredRules = new ArrayList<>();
-
         List<Rule> activeRules = ruleRepository.findByActiveTrueAndDeletedFalse();
 
         System.out.println("=================================");
         System.out.println("FRAUD DETECTION");
-        System.out.println("Transaction amount: " + transaction.getAmount());
+        System.out.println("Transaction ID: " + transaction.getId() + " | Amount: " + transaction.getAmount());
+        System.out.println("Sender: " + transaction.getSender() + " | Receiver: " + transaction.getReceiver());
         System.out.println("Active rules: " + activeRules.size());
 
         for (Rule rule : activeRules) {
@@ -48,66 +48,93 @@ public class FraudDetectionService {
             );
 
             if (rule.getType() == RuleType.HIGH_AMOUNT) {
-
                 if (isHighAmount(transaction, rule)) {
                     triggeredRules.add(rule);
-
                     System.out.println(">>> HIGH_AMOUNT TRIGGERED");
                 }
-
-            } else if (rule.getType() == RuleType.VELOCITY) {
-
-                if (isHighVelocity(transaction, rule)) {
+            } else if (rule.getType() == RuleType.SENDER_VELOCITY) {
+                if (isHighSenderVelocity(transaction, rule)) {
                     triggeredRules.add(rule);
-
-                    System.out.println(">>> VELOCITY TRIGGERED");
+                    System.out.println(">>> SENDER_VELOCITY TRIGGERED");
+                }
+            } else if (rule.getType() == RuleType.RECEIVER_VELOCITY) {
+                if (isHighReceiverVelocity(transaction, rule)) {
+                    triggeredRules.add(rule);
+                    System.out.println(">>> RECEIVER_VELOCITY TRIGGERED");
                 }
             }
         }
 
-        System.out.println("Triggered rules: " + triggeredRules.size());
+        System.out.println("Triggered rules count: " + triggeredRules.size());
         System.out.println("=================================");
 
         return triggeredRules;
     }
 
-    private boolean isHighAmount(
+    public boolean isHighAmount(
             Transaction transaction,
             Rule rule) {
 
         BigDecimal threshold = rule.getAmountThreshold();
 
-        if (threshold == null) {
+        if (threshold == null || transaction.getAmount() == null) {
             return false;
         }
 
         return transaction.getAmount().compareTo(threshold) > 0;
     }
 
-    private boolean isHighVelocity(
+    public boolean isHighSenderVelocity(
             Transaction transaction,
             Rule rule) {
 
         if (rule.getTransactionCount() == null
-                || rule.getTimeWindowMinutes() == null) {
+                || rule.getTimeWindowMinutes() == null
+                || transaction.getSender() == null
+                || transaction.getTimestamp() == null) {
 
             return false;
         }
 
         LocalDateTime endTime = transaction.getTimestamp();
+        LocalDateTime startTime = endTime.minusMinutes(rule.getTimeWindowMinutes());
 
-        LocalDateTime startTime
-                = endTime.minusMinutes(
-                        rule.getTimeWindowMinutes()
-                );
-
-        long count
-                = transactionRepository.countRecentTransactions(
-                        transaction.getSender(),
-                        startTime,
-                        endTime
-                );
+        long count = transactionRepository.countRecentTransactionsBySender(
+                transaction.getSender(),
+                startTime,
+                endTime
+        );
 
         return count >= rule.getTransactionCount();
+    }
+
+    public boolean isHighReceiverVelocity(
+            Transaction transaction,
+            Rule rule) {
+
+        if (rule.getTransactionCount() == null
+                || rule.getTimeWindowMinutes() == null
+                || transaction.getReceiver() == null
+                || transaction.getTimestamp() == null) {
+
+            return false;
+        }
+
+        LocalDateTime endTime = transaction.getTimestamp();
+        LocalDateTime startTime = endTime.minusMinutes(rule.getTimeWindowMinutes());
+
+        long count = transactionRepository.countRecentTransactionsByReceiver(
+                transaction.getReceiver(),
+                startTime,
+                endTime
+        );
+
+        return count >= rule.getTransactionCount();
+    }
+
+    public boolean isHighVelocity(
+            Transaction transaction,
+            Rule rule) {
+        return isHighSenderVelocity(transaction, rule);
     }
 }

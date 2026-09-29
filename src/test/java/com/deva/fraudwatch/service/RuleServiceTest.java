@@ -73,12 +73,23 @@ class RuleServiceTest {
     }
 
     @Test
-    void testCreateRule_InvalidVelocity_ThrowsException() {
+    void testCreateRule_InvalidSenderVelocity_ThrowsException() {
         RuleRequest request = new RuleRequest();
-        request.setName("Velocity");
-        request.setType(RuleType.VELOCITY);
+        request.setName("Sender Velocity");
+        request.setType(RuleType.SENDER_VELOCITY);
         request.setTransactionCount(null); // missing count
         request.setTimeWindowMinutes(10);
+
+        assertThrows(BusinessRuleException.class, () -> ruleService.createRule(request));
+    }
+
+    @Test
+    void testCreateRule_InvalidReceiverVelocity_ThrowsException() {
+        RuleRequest request = new RuleRequest();
+        request.setName("Receiver Velocity");
+        request.setType(RuleType.RECEIVER_VELOCITY);
+        request.setTransactionCount(5);
+        request.setTimeWindowMinutes(null); // missing time window
 
         assertThrows(BusinessRuleException.class, () -> ruleService.createRule(request));
     }

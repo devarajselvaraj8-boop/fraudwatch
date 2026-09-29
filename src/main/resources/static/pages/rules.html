@@ -84,7 +84,7 @@
                 <div id="ruleAlertBanner" style="display: none; padding: 14px 18px; margin-bottom: 24px; border: 1px solid var(--navy); background-color: var(--white); color: var(--navy); font-size: 0.9rem; font-weight: 600; letter-spacing: 0.02em;"></div>
 
                 <!-- Mini Metric Cards -->
-                <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+                <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 24px;">
                     <div class="kpi-card">
                         <div class="kpi-label">Total Rules</div>
                         <div class="kpi-value" id="totalRulesCount">0</div>
@@ -104,9 +104,15 @@
                     </div>
 
                     <div class="kpi-card">
-                        <div class="kpi-label">Velocity</div>
-                        <div class="kpi-value" id="velocityRulesCount">0</div>
-                        <div class="kpi-desc">Frequency burst triggers</div>
+                        <div class="kpi-label">Sender Velocity</div>
+                        <div class="kpi-value" id="senderVelocityRulesCount">0</div>
+                        <div class="kpi-desc">Sender burst triggers</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-label">Receiver Velocity</div>
+                        <div class="kpi-value" id="receiverVelocityRulesCount">0</div>
+                        <div class="kpi-desc">Receiver burst triggers</div>
                     </div>
                 </div>
 
@@ -120,8 +126,9 @@
                     <div class="filter-group">
                         <select id="filterRuleType" class="filter-select">
                             <option value="ALL">All Rule Types</option>
-                            <option value="HIGH_AMOUNT">High Amount</option>
-                            <option value="VELOCITY">Velocity</option>
+                            <option value="HIGH_AMOUNT">High Amount [HIGH_AMOUNT]</option>
+                            <option value="SENDER_VELOCITY">Sender Velocity [SENDER_VELOCITY]</option>
+                            <option value="RECEIVER_VELOCITY">Receiver Velocity [RECEIVER_VELOCITY]</option>
                         </select>
 
                         <select id="filterRuleStatus" class="filter-select">
@@ -173,8 +180,9 @@
                         <div class="form-group">
                             <label class="form-label required" for="ruleType">Rule Type</label>
                             <select id="ruleType" class="form-control" required>
-                                <option value="HIGH_AMOUNT">HIGH_AMOUNT</option>
-                                <option value="VELOCITY">VELOCITY</option>
+                                <option value="HIGH_AMOUNT">High Amount [HIGH_AMOUNT]</option>
+                                <option value="SENDER_VELOCITY">Sender Velocity [SENDER_VELOCITY]</option>
+                                <option value="RECEIVER_VELOCITY">Receiver Velocity [RECEIVER_VELOCITY]</option>
                             </select>
                         </div>
 
@@ -203,7 +211,7 @@
                             <div class="form-group">
                                 <label class="form-label required" for="ruleTransactionCount">Max Transaction Count</label>
                                 <input type="number" id="ruleTransactionCount" class="form-control" placeholder="e.g. 5" min="1" step="1">
-                                <div class="form-hint">Threshold count from same sender.</div>
+                                <div class="form-hint" id="velocityHint">Threshold transaction count.</div>
                             </div>
 
                             <div class="form-group">

@@ -110,17 +110,20 @@ function renderRecentTransactions(transactions) {
 }
 
 /**
- * Section 4: Fraud Rules Statistics (High Amount & Velocity)
+ * Section 4: Fraud Rules Statistics (High Amount, Sender Velocity, Receiver Velocity)
  */
 function renderFraudRules(rulesStats) {
     const highAmountCountEl = document.getElementById('rule-high-amount-count');
-    const velocityCountEl = document.getElementById('rule-velocity-count');
+    const senderVelocityCountEl = document.getElementById('rule-sender-velocity-count');
+    const receiverVelocityCountEl = document.getElementById('rule-receiver-velocity-count');
 
     const highAmountCount = rulesStats && rulesStats['HIGH_AMOUNT'] !== undefined ? rulesStats['HIGH_AMOUNT'] : 0;
-    const velocityCount = rulesStats && rulesStats['VELOCITY'] !== undefined ? rulesStats['VELOCITY'] : 0;
+    const senderVelocityCount = rulesStats && rulesStats['SENDER_VELOCITY'] !== undefined ? rulesStats['SENDER_VELOCITY'] : 0;
+    const receiverVelocityCount = rulesStats && rulesStats['RECEIVER_VELOCITY'] !== undefined ? rulesStats['RECEIVER_VELOCITY'] : 0;
 
     if (highAmountCountEl) highAmountCountEl.textContent = highAmountCount;
-    if (velocityCountEl) velocityCountEl.textContent = velocityCount;
+    if (senderVelocityCountEl) senderVelocityCountEl.textContent = senderVelocityCount;
+    if (receiverVelocityCountEl) receiverVelocityCountEl.textContent = receiverVelocityCount;
 }
 
 /**

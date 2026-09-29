@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,17 +81,17 @@ class FraudDetectionServiceTest {
     }
 
     @Test
-    void testDetectFraud_VelocityTriggered() {
+    void testDetectFraud_SenderVelocityTriggered() {
         Rule velocityRule = new Rule();
         velocityRule.setId(2L);
-        velocityRule.setName("Velocity");
-        velocityRule.setType(RuleType.VELOCITY);
+        velocityRule.setName("Sender Velocity");
+        velocityRule.setType(RuleType.SENDER_VELOCITY);
         velocityRule.setTransactionCount(5);
         velocityRule.setTimeWindowMinutes(10);
         velocityRule.setActive(true);
 
         when(ruleRepository.findByActiveTrueAndDeletedFalse()).thenReturn(List.of(velocityRule));
-        when(transactionRepository.countRecentTransactions(eq("ACC500"), any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(transactionRepository.countRecentTransactionsBySender(eq("ACC500"), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(5L);
 
         Transaction tx = new Transaction();
@@ -103,11 +102,36 @@ class FraudDetectionServiceTest {
 
         List<Rule> triggered = fraudDetectionService.detectFraud(tx);
         assertEquals(1, triggered.size());
-        assertEquals(RuleType.VELOCITY, triggered.get(0).getType());
+        assertEquals(RuleType.SENDER_VELOCITY, triggered.get(0).getType());
     }
 
     @Test
-    void testDetectFraud_BothRulesTriggered() {
+    void testDetectFraud_ReceiverVelocityTriggered() {
+        Rule velocityRule = new Rule();
+        velocityRule.setId(3L);
+        velocityRule.setName("Receiver Velocity");
+        velocityRule.setType(RuleType.RECEIVER_VELOCITY);
+        velocityRule.setTransactionCount(5);
+        velocityRule.setTimeWindowMinutes(10);
+        velocityRule.setActive(true);
+
+        when(ruleRepository.findByActiveTrueAndDeletedFalse()).thenReturn(List.of(velocityRule));
+        when(transactionRepository.countRecentTransactionsByReceiver(eq("ACC600"), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(5L);
+
+        Transaction tx = new Transaction();
+        tx.setSender("ACC500");
+        tx.setReceiver("ACC600");
+        tx.setAmount(BigDecimal.valueOf(100));
+        tx.setTimestamp(LocalDateTime.now());
+
+        List<Rule> triggered = fraudDetectionService.detectFraud(tx);
+        assertEquals(1, triggered.size());
+        assertEquals(RuleType.RECEIVER_VELOCITY, triggered.get(0).getType());
+    }
+
+    @Test
+    void testDetectFraud_AllThreeRulesTriggered() {
         Rule highAmountRule = new Rule();
         highAmountRule.setId(1L);
         highAmountRule.setName("High Amount");
@@ -115,16 +139,26 @@ class FraudDetectionServiceTest {
         highAmountRule.setAmountThreshold(BigDecimal.valueOf(10000));
         highAmountRule.setActive(true);
 
-        Rule velocityRule = new Rule();
-        velocityRule.setId(2L);
-        velocityRule.setName("Velocity");
-        velocityRule.setType(RuleType.VELOCITY);
-        velocityRule.setTransactionCount(5);
-        velocityRule.setTimeWindowMinutes(10);
-        velocityRule.setActive(true);
+        Rule senderVelocityRule = new Rule();
+        senderVelocityRule.setId(2L);
+        senderVelocityRule.setName("Sender Velocity");
+        senderVelocityRule.setType(RuleType.SENDER_VELOCITY);
+        senderVelocityRule.setTransactionCount(5);
+        senderVelocityRule.setTimeWindowMinutes(10);
+        senderVelocityRule.setActive(true);
 
-        when(ruleRepository.findByActiveTrueAndDeletedFalse()).thenReturn(List.of(highAmountRule, velocityRule));
-        when(transactionRepository.countRecentTransactions(eq("ACC500"), any(LocalDateTime.class), any(LocalDateTime.class)))
+        Rule receiverVelocityRule = new Rule();
+        receiverVelocityRule.setId(3L);
+        receiverVelocityRule.setName("Receiver Velocity");
+        receiverVelocityRule.setType(RuleType.RECEIVER_VELOCITY);
+        receiverVelocityRule.setTransactionCount(5);
+        receiverVelocityRule.setTimeWindowMinutes(10);
+        receiverVelocityRule.setActive(true);
+
+        when(ruleRepository.findByActiveTrueAndDeletedFalse()).thenReturn(List.of(highAmountRule, senderVelocityRule, receiverVelocityRule));
+        when(transactionRepository.countRecentTransactionsBySender(eq("ACC500"), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(6L);
+        when(transactionRepository.countRecentTransactionsByReceiver(eq("ACC600"), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(6L);
 
         Transaction tx = new Transaction();
@@ -134,12 +168,11 @@ class FraudDetectionServiceTest {
         tx.setTimestamp(LocalDateTime.now());
 
         List<Rule> triggered = fraudDetectionService.detectFraud(tx);
-        assertEquals(2, triggered.size());
+        assertEquals(3, triggered.size());
     }
 
     @Test
     void testDetectFraud_DeletedRule_NotTriggered() {
-        // Active non-deleted rule list is empty (because rule was soft-deleted)
         when(ruleRepository.findByActiveTrueAndDeletedFalse()).thenReturn(List.of());
 
         Transaction tx = new Transaction();
